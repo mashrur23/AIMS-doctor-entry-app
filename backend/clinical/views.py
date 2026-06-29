@@ -293,15 +293,49 @@ def _excel_workbook(consultations):
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "consultations_json"
-    sheet.append(["file_name", "patient_identifier", "consultation_date", "json_payload"])
+    columns = [
+        "id",
+        "file_name",
+        "patient_identifier",
+        "consultation_date",
+        "transcript",
+        "family_history",
+        "allergic_history",
+        "personal_history",
+        "gynae_obs_history",
+        "health_screening",
+        "clinical_exam",
+        "advice",
+        "chief_complaints",
+        "investigations",
+        "diagnoses",
+        "medications",
+        "full_json",
+    ]
+    sheet.append(columns)
 
     for consultation in consultations:
         payload = _serialize_consultation(consultation)
+        patient_sections = payload["patient_sections"]
+        consultation_sections = payload["consultation_sections"]
         sheet.append(
             [
+                payload["id"],
                 payload["file_name"],
                 payload["patient_identifier"],
                 payload["consultation_date"],
+                payload["transcript"],
+                json.dumps(patient_sections.get("family_history", {}), ensure_ascii=False),
+                json.dumps(patient_sections.get("allergic_history", {}), ensure_ascii=False),
+                json.dumps(patient_sections.get("personal_history", {}), ensure_ascii=False),
+                json.dumps(patient_sections.get("gynae_obs_history", {}), ensure_ascii=False),
+                json.dumps(consultation_sections.get("health_screening", {}), ensure_ascii=False),
+                json.dumps(consultation_sections.get("clinical_exam", {}), ensure_ascii=False),
+                json.dumps(consultation_sections.get("advice", {}), ensure_ascii=False),
+                json.dumps(consultation_sections.get("chief_complaints", []), ensure_ascii=False),
+                json.dumps(consultation_sections.get("investigations", []), ensure_ascii=False),
+                json.dumps(consultation_sections.get("diagnoses", []), ensure_ascii=False),
+                json.dumps(consultation_sections.get("medications", []), ensure_ascii=False),
                 json.dumps(payload, ensure_ascii=False),
             ]
         )
